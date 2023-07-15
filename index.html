@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title> 段润彬的个人小站</title>
+      <title> 我的个人小站</title>
   <meta name="generator" content="hexo-theme-ayer">
        
 <link rel="stylesheet" href="/dist/main.css">
@@ -60,7 +60,7 @@
       <img src="/images/cover2.jpg" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
-      <h1><a href="/">段润彬的个人小站</a></h1>
+      <h1><a href="/">我的个人小站</a></h1>
       <div id="subtitle-box">
         
         <span id="subtitle"></span>
@@ -86,7 +86,7 @@
   <script>
     try {
       var typed = new Typed("#subtitle", {
-        strings: ['欢迎来到我的网站', '我的第一个个人网站', ''],
+        strings: ['欢迎来到我的网站', '', ''],
         startDelay: 0,
         typeSpeed: 200,
         loop: true,
@@ -332,7 +332,7 @@
       <li>
         Copyrights &copy;
         2023
-        <i class="ri-heart-fill heart_icon"></i> John Doe
+        <i class="ri-heart-fill heart_icon"></i> drb
       </li>
     </ul>
     <ul>
@@ -651,6 +651,42 @@
 
     
     
+<script>
+  const password = "20101106";
+  const lock_password = window.sessionStorage.getItem("lock_password");
+  console.log(password, lock_password);
+  if (lock_password !== password) {
+    Swal.fire({
+      title: "Please enter password",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: false,
+      showLoaderOnConfirm: true,
+      allowOutsideClick: false,
+      confirmButtonText: "Ok",
+    }).then((result) => {
+      console.log(result);
+      if (result.isConfirmed) {
+        console.log(password);
+        if (result.value === password) {
+          window.sessionStorage.setItem("lock_password", result.value);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Incorrect password, please try again",
+            confirmButtonText: "Ok",
+            allowOutsideClick: false,
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+      }
+    });
+  }
+</script>
+
 
   </div>
 </body>
