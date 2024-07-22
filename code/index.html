@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>代码</title>
+  <meta name="generator" content="hexo-theme-ayer">
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="page-"
+  class="article article-type-page"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  代码
+</h1>
+ 
+
+      
+    </header>
+       
+    <div class="article-entry" itemprop="articleBody">
+       
+        <code>
+          #include "user.h"         /*该行是必须的*/
+
+#define symbol( x ) ( x < 0  ? -1 : ( x > 0 ? 1 : 0 ) )
+
+float dT = 1.0f;          /*积分周期、定时任务周期，毫秒*/
+
+uint16_t gray_th[13];
+
+
+int8_t state;
+int8_t op;
+int8_t yiting;
+uint32_t out_time;
+
+int16_t ls;
+int16_t es;
+int16_t is;
+int16_t ds;
+
+float laz;
+float eaz;
+float iaz;
+float daz;
+
+float lrz;
+float erz;
+float irz;
+float drz;
+
+void mydriver(int16_t lv, int16_t rv);
+void setEn(uint8_t ch, uint32_t count);
+int32_t En(void);
+void gray_init(void);
+int8_t gray_state(uint8_t ch);
+void states_out(void);
+void sport(int16_t speed);
+void line(int16_t speed, int16_t angle);
+
+void program1(void);
+void program2(void);
+void program3(void);
+void start(void);
+void stop(void);
+void sportdh(uint16_t sp,uint16_t Ens,uint16_t  pei);
+void RateZ_test(void);
+void Task(void)   
+{
+	start();	
+  if(key == 1)
+	{
+		program1();
+	}
+	else if(key == 2)
+	{
+		//program2();
+		sportdh(250,19000,-5);
+	}
+	else if(key == 4)
+	{
+		program3();
+		
+	}
+	else 
+	{
+		gray_init();
+	}
+	stop();
+}
+
+void sportdh(uint16_t sp,uint16_t Ens,uint16_t  pei)
+{
+	float pyt;
+	int8_t last;
+	int16_t H;
+	int16_t dg;
+	float p;
+  while(En() < Ens)
+	{
+		if(seconds() > out_time+500 && abs(state) > 5)
+		{
+			op=1;
+      		break;
+		}
+		if(pei!=0)
+		{
+			es = state+pei;
+			p= sp*(1.0f-0.15f*abs(es));
+			//pyt =0.129f*sp*state; 
+			pyt = 0.13f*sp*es+0.29*is+10.0f*ds; 
+			mydriver(p,pyt);
+		}
+		else
+		{
+			if(last != state)
+			{
+				H = H_angle();
+				last = state;
+			}
+			dg = (H+29*yiting+3600)%3600;
+			es=state;
+			if(abs(state) > 5)
+			{
+				mydriver(abs((int16_t )(is*0.1f)),50*state-0.29f*is);
+			}
+			else
+			{
+				line(sp, dg);
+			}
+		}
+	}
+		
+}
+void program1(void)   
+{
+	uint16_t sum;
+	uint16_t sp[20]={350, 270, 300, 300,300, 250,  380,  250,  300,  0};
+	uint16_t pyt[100];
+	while(1)
+	{
+		//sport(100);
+		if(touch())
+		{
+			pyt[sum++]=En();
+			motor1(0);
+			motor2(0);
+			motor3(0);
+			motor4(0);
+			LCD_Clear(RED);
+			sleep(200);
+			LCD_Clear(GREEN);
+		}
+		if(GetKey())
+		{
+			LCD_Clear(BACK_COLOR);
+			LCD_XY(10,10);
+			printf("Waiting...");
+			motor1(0);
+			motor2(0);
+			motor3(0);
+			motor4(0);
+			sleep(300);
+			while(1)
+			{
+				if(GetKey())
+				{
+					LCD_Clear(BACK_COLOR);
+					LCD_XY(10,10);
+					printf("OK!");
+					sleep(300 );
+					for(uint16_t i=1;i<sum;i++)
+					{
+							LCD_XY(10,10+i*20);
+						printf(" %d :%d",i,pyt[i]);
+					}
+					LCD_Print = 0;
+
+					for(uint16_t i=1;i<sum;i++)
+					{
+						printf(" \r\n%d :%d",i,pyt[i]);
+					}
+					printf("\r\n");
+					for(uint16_t i=1;i<sum;i++)
+					{
+						printf("%d,",pyt[i]);
+					}
+						for(uint16_t i = 0; i < sum; i++)
+					{
+								eepwrite(2*i,sp[i]);
+								eepwrite(2*i+1,pyt[i+1]);
+					}
+				}
+			}
+			
+
+		}
+	}
+}
+
+void program2(void)   
+{
+	int16_t sp = eepread(0);
+	int16_t Ens = eepread(1);
+  while(En() < 19989)
+	{
+		sport(sp);
+		if(seconds() > out_time+300 && abs(state) > 5)
+		{
+      break;
+		}
+	}
+}
+  
+void program3(void)   
+{
+	int16_t i;
+	int16_t sp[20];//={350, 270, 300, 300,300, 250,  380,  250,  300,  0};
+	int16_t Ens[20];//={998,5448,7288,9775,10717,12362,15918,16711,17981,0};
+	int16_t pei[20]={};
+	int16_t yt;
+	float buf = 200.0f;
+
+	for(uint16_t i = 0; i < 20; i++)
+	{
+				sp[i]=eepread(2*i);
+				Ens[i]=eepread(2*i+1);
+	}
+	for(i = 0; i < 1000; i++)
+	{
+		sport(i/2);
+	}
+	
+	for(i = 0; i < 20; i++)
+	{
+		if(Ens[i] == 0 || sp[i] == 0 || op==1)
+		{
+			break;
+		}
+		yt=10;
+		if(pei[i]!=0)
+		{
+			yt=pei[i];
+		}
+		sportdh(sp[i],Ens[i],yt);
+	}
+}
+
+void RateZ_test(void)   
+{
+	LCD_Clear(BACK_COLOR);
+	while(1)
+	{
+		LCD_XY(10,10);
+	  printf("%f",imudata[14]);
+	  LCD_XY(10,30);
+	  printf("%f",imudata[15]);
+		LCD_XY(10,50);
+	  printf("%4d",H_angle());
+		if(touch())
+		{
+		  motor1(-300);
+	    motor2(-300);
+	    motor3(-300);
+	    motor4(-300);
+		  sleep(2000);
+		  LCD_XY(10,70);
+	    printf("%f",imudata[6]-imudata[13]);
+		  motor1(0);
+	    motor2(0);
+	    motor3(0);
+	    motor4(0);
+		}
+	}
+}
+
+void start(void)
+{
+	uint8_t i; 
+	for(i = 0; i < 13; i++)
+	{
+		gray_th[i] = eepread(100+i);
+		sleep(10);
+	}    
+USART1_baud(38400);		
+	motor1_start();//涵道无刷电机初始化
+	motor2_start();
+	motor3_start();
+	motor4_start();
+  Encoder1_init();
+	Encoder2_init();
+	Callbacktime((uint32_t)dT);                   /*开启定时线程*/ 
+	LCD_Clear(GREEN);
+
+  while(1)
+	{
+		LCD_XY(10,10);
+	  printf("%4d",H_angle());
+		LCD_XY(10,30);
+	  printf("%3d",state);
+		if(touch() || GetKey())
+		{
+			break;
+		}
+	}	
+	setEn(1,0);
+	setEn(2,0);
+	reset_system_time();
+	H_reset(0);
+}
+
+void stop(void)    
+{
+  uint32_t time = seconds();  
+	motor1(0);
+	motor2(0);
+	motor3(0);
+	motor4(0);
+	LCD_Clear(BACK_COLOR);
+	sleep(1000);
+	LCD_XY(10,10);
+	printf("time = %d",time);
+	LCD_XY(10,30);
+	printf("En = %d",En());
+}
+
+void setEn(uint8_t ch, uint32_t count)  
+{
+	if(ch == 1)
+	{
+		__HAL_TIM_SET_COUNTER(&htim5, count);
+	}
+	else if(ch == 2)
+	{
+		__HAL_TIM_SET_COUNTER(&htim2, count);
+	}
+}
+
+int32_t En(void)
+{
+	return (Encoder1()-Encoder2())/2;  
+}
+
+void gray_init(void)  
+{
+	uint16_t i;
+	uint16_t max[13];
+	uint16_t min[13];
+	LCD_Clear(BACK_COLOR);
+	LCD_FONT(12);
+	for(i = 0; i < 13; i++)
+	{
+		max[i] = 0;
+		min[i] = 4095;
+	}
+	while(1)
+	{
+		for(i = 0; i < 13; i++)
+	  {
+		  LCD_XY(10,10+10*i);
+	    printf("%4d %4d",analog(i+1),gray_state(i));
+	  }
+		for(i = 0; i < 13; i++)
+	  {
+		  if(max[i] < analog(i+1))
+		  {
+			  max[i] = analog(i+1);
+		  }
+			if(min[i] > analog(i+1))
+		  {
+			  min[i] = analog(i+1);
+		  }
+	  }
+		if(GetKey())
+		{
+			while(GetKey());
+			LCD_Clear(BACK_COLOR);
+			for(i = 0; i < 13; i++)
+		  {
+			  gray_th[i] = (max[i]+min[i])/2;
+		  }		
+			for(i = 0; i < 13; i++)
+		  {
+			  eepwrite(100+i, gray_th[i]);
+				sleep(50);
+		  }
+			RateZ_test();
+		}	
+	}
+}
+
+int8_t gray_state(uint8_t ch)
+{
+	if(analog(ch+1) < gray_th[ch])
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void states_out(void)
+{
+	if(gray_state(0) && !gray_state(12))
+	{	
+		yiting=10;
+		state = 6;	
+		out_time = seconds();
+	}
+	else if(!gray_state(0) && gray_state(12))
+	{	
+		yiting=-10;
+		state = -6;	
+		out_time = seconds();
+	}
+	else if(gray_state(1) && !gray_state(11))
+	{	
+		yiting=6;
+		state = 5;	
+		out_time = seconds();
+	}
+	else if(!gray_state(1) && gray_state(11))
+	{	
+		yiting=-6;
+		state = -5;	
+		out_time = seconds();
+	}
+	else if(gray_state(2) && !gray_state(10))
+	{	
+		yiting=4;
+		state = 4;	
+		out_time = seconds();
+	}
+	else if(!gray_state(2) && gray_state(10))
+	{	
+		yiting=-4;
+		state = -4;	
+		out_time = seconds();
+	}
+	else if(gray_state(3) && !gray_state(9))
+	{	
+		yiting=3;
+		state = 3;	
+		out_time = seconds();
+	}
+	else if(!gray_state(3) && gray_state(9))
+	{	
+		yiting=-3;
+		state = -3;	
+		out_time = seconds();
+	}
+	else if(gray_state(4) && !gray_state(8))
+	{	
+		yiting=2;
+		state = 2;	
+		out_time = seconds();
+	}
+	else if(!gray_state(4) && gray_state(8))
+	{	
+		yiting=-2;
+		state = -2;	
+		out_time = seconds();
+	}
+	else if(gray_state(5) && !gray_state(7))
+	{	
+		yiting=1;
+		state = 1;	
+		out_time = seconds();
+	}
+	else if(!gray_state(5) && gray_state(7))
+	{	
+		yiting=-1;
+		state = -1;	
+		out_time = seconds();
+	}
+	else if(gray_state(6))
+	{	
+		yiting=0;
+		state = 0;	
+		out_time = seconds();
+	}
+}
+
+void mydriver(int16_t lv, int16_t rv)
+{
+	int16_t spl;
+	int16_t spr; 
+	erz = rv-0.43f*(imudata[6]-imudata[13]);          
+	rv = rv+(int16_t)(1.5f*erz+0.0f*irz+0.0f*drz);  
+	spl = rv-lv;
+	spr = rv+lv;
+	motor1(-spl);
+	motor2(-spr);
+	motor3(-spl);
+	motor4(-spr);
+}
+
+void line(int16_t speed, int16_t angle)
+{
+	int16_t lv;
+	int16_t rv;
+	rv = angle_d(angle);
+	eaz = rv;
+	rv = LIMIT(rv, -900, 900);
+	lv = (speed*(900-abs(rv)))/900; 
+	rv = (int16_t)(0.8f*eaz+0.0f*iaz+0.0f*daz);
+	mydriver(lv, rv);
+}
+
+void sport(int16_t speed) 
+{
+	float lv;
+	float rv;
+	es = state;
+  lv = speed*(1.0f-0.15f*abs(state)); 	
+	if(abs(state) > 5)
+	{
+		rv = 0.12f*speed*state+10.0f*ds;
+	}
+	else
+	{
+		rv = 0.129f*speed*es+0.36*is+10.0f*ds; 
+	}
+  mydriver((int16_t)lv, (int16_t)rv);
+}
+
+void Callback(void)
+{
+	states_out();
+	getdata( imudata );
+	GetAngle(imudata, 100.0f, 0.001f, 0.001f, dT);
+	
+	is = is+symbol( es );
+	is = LIMIT(is, -32766, 32766);
+	ds = es-ls;
+	if(ls != es)
+	{
+		is = 0;
+		ls = es;
+	}
+	
+	iaz = iaz+eaz;
+	daz = eaz-laz;
+	laz = eaz;
+	
+	irz = irz+erz;
+	if(erz == 0 || (erz > 0 && irz < 0) || (erz < 0 && irz > 0))
+	{
+		irz = 0;
+	}
+	drz = erz-lrz;
+	lrz = erz;
+}
+
+void copyright(void)
+{
+	LCD_Init();
+	imu_init();
+	eep_init();
+	LCD_Init();	
+	HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);  
+  HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED); 
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC1DMA, 14);
+	init();
+}
+
+        </code>
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+  
+   
+  
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023-2024
+        <i class="ri-heart-fill heart_icon"></i> drb
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photos">图片</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/1.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
