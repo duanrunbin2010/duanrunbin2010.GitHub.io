@@ -46,6 +46,16 @@
 
 
 <body>
+  <script>
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      const hitokoto = document.querySelector('#hitokoto_text')
+      hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
+      hitokoto.innerText = data.hitokoto
+    })
+    .catch(console.error)
+</script>
   <div id="app">
     
       
@@ -61,19 +71,9 @@
       <img src="/yiyan/celebrity_25.webp" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
-      <div class="hitokoto" style="
-text-align: center;
-color: grey;
-"><script type='text/javascript'>
-$.get("https://v1.hitokoto.cn/",function(data,status){
-if (status == 'success'){
-    $('.hitokoto').text(data.hitokoto+"By:"+data.from);
-}else{
-    $('.hitokoto').text('获取出错！');
-}
-});
-</script>
-</div>
+    <p id="hitokoto">
+        <a href="#" id="hitokoto_text">:D 获取中...</a>
+  </p>
       <div id="subtitle-box">
         
         <span id="subtitle"></span>
@@ -95,19 +95,7 @@ if (status == 'success'){
 
 
 <!-- Subtitle -->
-<p id="hitokoto">
-  <a href="#" id="hitokoto_text">:D 获取中...</a>
-</p>
-<script>
-  fetch('https://v1.hitokoto.cn')
-    .then(response => response.json())
-    .then(data => {
-      const hitokoto = document.querySelector('#hitokoto_text')
-      hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
-      hitokoto.innerText = data.hitokoto
-    })
-    .catch(console.error)
-</script>
+
 
   
 <div id="main">
