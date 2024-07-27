@@ -23,7 +23,8 @@
 <link rel="stylesheet" href="/css/custom.css">
  
       <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
-       
+        <script src="https://cdn.jsdelivr.net/npm/bluebird@3/js/browser/bluebird.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.3/fetch.min.js"></script>
  
 
       <link
@@ -60,7 +61,19 @@
       <img src="/yiyan/celebrity_25.webp" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
-      <h1><a href="/">一言</a></h1>
+      <div class="hitokoto" style="
+text-align: center;
+color: grey;
+"><script type='text/javascript'>
+$.get("https://v1.hitokoto.cn/",function(data,status){
+if (status == 'success'){
+    $('.hitokoto').text(data.hitokoto+"By:"+data.from);
+}else{
+    $('.hitokoto').text('获取出错！');
+}
+});
+</script>
+</div>
       <div id="subtitle-box">
         
         <span id="subtitle"></span>
@@ -83,19 +96,7 @@
 
 <!-- Subtitle -->
 
-<div class="hitokoto" style="
-text-align: center;
-color: grey;
-"><script type='text/javascript'>
-$.get("https://v1.hitokoto.cn/",function(data,status){
-if (status == 'success'){
-    $('.hitokoto').text(data.hitokoto+"By:"+data.from);
-}else{
-    $('.hitokoto').text('获取出错！');
-}
-});
-</script>
-</div>
+
   
 <div id="main">
   <section class="outer">
