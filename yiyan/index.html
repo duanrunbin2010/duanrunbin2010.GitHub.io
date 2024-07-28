@@ -47,14 +47,16 @@
 
 <body>
   <script>
-  fetch('https://v1.hitokoto.cn/?c=a&c=b&c=h')
+  fetch('https://v1.hitokoto.cn/?c=a&c=b')
     .then(response => response.json())
     .then(data => {
       const hitokoto = document.querySelector('#hitokoto_text')
       const from = document.querySelector('#hitokoto_from')
+      const fromwho = document.querSelector('#hitokoto_who')
       hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
       hitokoto.innerText = data.hitokoto
       from.innerText=data.from
+      fromwho.innerText=data.from_who	
     })
     .catch(console.error)
 </script>
@@ -77,7 +79,8 @@
       <h1><div class="bracket left">『&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</div></h1>
       <h2><span class="word" id="hitokoto_text"></span></h2>
       <h1><div class="bracket right">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;』</div></h1>
-      <h5>From:<span class="word" id="hitokoto_from"></span></h5>
+      <h5>《 <span class="word" id="hitokoto_from"></span> 》</h5>
+      <h5> —— <span class="word" id="hitokoto_who"></span> —— </h5>
     </div>
    
   </div>
