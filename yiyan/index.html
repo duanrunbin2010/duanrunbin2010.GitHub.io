@@ -47,7 +47,7 @@
 
 <body>
   <script>
-  fetch('https://v1.hitokoto.cn')
+  fetch('https://v1.hitokoto.cn/?c=d&c=e&c=h&c=i&c=k')
     .then(response => response.json())
     .then(data => {
       const hitokoto = document.querySelector('#hitokoto_text')
@@ -72,12 +72,11 @@
       <img src="/yiyan/celebrity_25.webp" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
+      <div class="bracket left">『</div>
     <p id="hitokoto">
         <h3><a href="#" id="hitokoto_text">:D 获取中...</a></h3>
-      
-         <h5><a href="#">——</a></h5>
-        <h5><a href="#" id="hitokoto_from">获取中...</a></h5>
     </p>
+       <div class="bracket right">』</div>
       <div id="subtitle-box">
         
         <span id="subtitle"></span>
