@@ -51,6 +51,7 @@
     .then(response => response.json())
     .then(data => {
       const hitokoto = document.querySelector('#hitokoto_text')
+      const from = document.querySelector('#hitokoto_from')
       hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
       hitokoto.innerText = data.hitokoto
     })
