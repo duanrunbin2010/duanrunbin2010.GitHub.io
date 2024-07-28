@@ -52,11 +52,11 @@
     .then(data => {
       const hitokoto = document.querySelector('#hitokoto_text')
       const from = document.querySelector('#hitokoto_from')
-      const fromwho = document.querSelector('#hitokoto_who')
+      const from_who = document.querSelector('#hitokoto_from_who')
       hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
       hitokoto.innerText = data.hitokoto
       from.innerText=data.from
-      fromwho.innerText=data.from_who	
+      from_who.innerText=data.from_who	
     })
     .catch(console.error)
 </script>
@@ -80,7 +80,7 @@
       <h2><span class="word" id="hitokoto_text"></span></h2>
       <h1><div class="bracket right">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;』</div></h1>
       <h5>《 <span class="word" id="hitokoto_from"></span> 》</h5>
-      <h5> —— <span class="word" id="hitokoto_who"></span> —— </h5>
+      <h5> —— <span class="word" id="hitokoto_from_who"></span> —— </h5>
     </div>
    
   </div>
