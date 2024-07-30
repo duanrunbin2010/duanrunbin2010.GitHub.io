@@ -1,8 +1,8 @@
-#include "user.h"        
+#include "user.h"     
 /*****V3.0*****/
 #define symbol( x ) ( x < 0  ? -1 : ( x > 0 ? 1 : 0 ) )
 
-float dT = 1.0f;        
+float dT = 1.0f;    
 
 uint16_t gray_th[13];
 
@@ -79,7 +79,7 @@ void program1(void)
 	{
 		if(GetKey())
 		{
-			sleep(300);
+			sleep(500);
 				LCD_Clear(BLUE);
 			while(1)
 			{
@@ -98,7 +98,7 @@ void program1(void)
 						if(touch())
 						{
 							pyt[sum++]=En();
-							sleep(300);
+							sleep(500);
 							LCD_Clear(BLUE);
 							break;
 						}
@@ -109,7 +109,7 @@ void program1(void)
 					motor3(0);
 					motor4(0);
 					LCD_Clear(BACK_COLOR);
-					sleep(300);
+					sleep(500);
 					for(uint16_t i=0;i<sum;i++)
 					{
 						LCD_XY(10,10+i*20);
@@ -144,7 +144,7 @@ void program1(void)
 		}			
 		else if(touch())
 		{
-			sleep(300);
+			sleep(500);
 			sum=1;
 			while(1)
 	{
@@ -165,7 +165,7 @@ void program1(void)
 			printf("En:%d",pyt[sum-1]);
 			LCD_XY(0,40);
 			printf("sp:%d",sp[sum-2]);
-			sleep(300);
+			sleep(500);
 			while(1)
 			{
 				LCD_XY(0,0);
@@ -173,7 +173,7 @@ void program1(void)
 				if(touch())
 				{
 					pt+=pyt[sum-1]-last;
-					sleep(300);
+					sleep(500);
 					break;
 				}
 				/******* */
@@ -547,6 +547,75 @@ int8_t gray_state(uint8_t ch)
 		return 0;
 	}
 }
+//void states_out(void)
+//{
+//				if(gray_state(6))
+//				{	
+//					state = 0;	
+//					out_time = seconds();
+//				}
+//				else if(gray_state(5) && !gray_state(7))
+//				{	
+//					state = 1;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(5) && gray_state(7))
+//				{	
+//					state = -1;	
+//					out_time = seconds();
+//				}
+//				else if(gray_state(4) && !gray_state(8))
+//				{	
+//					state = 2;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(4) && gray_state(8))
+//				{	
+//					state = -2;	
+//					out_time = seconds();
+//				}
+//				else if(gray_state(3) && !gray_state(9))
+//				{	
+//					state = 3;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(3) && gray_state(9))
+//				{	
+//					state = -3;	
+//					out_time = seconds();
+//				}
+//				else if(gray_state(2) && !gray_state(10))
+//				{	
+//					state = 4;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(2) && gray_state(10))
+//				{	
+//					state = -4;	
+//					out_time = seconds();
+//				}
+//				else if(gray_state(1) && !gray_state(11))
+//				{	
+//					state = 6;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(1) && gray_state(11))
+//				{	
+//					state = -6;	
+//					out_time = seconds();
+//				}
+//				if(gray_state(0) && !gray_state(12))
+//				{	
+//					state = 10;	
+//					out_time = seconds();
+//				}
+//				else if(!gray_state(0) && gray_state(12))
+//				{	
+//					state = -10;	
+//					out_time = seconds();
+//				}
+//}
+
 void states_out(void)
 {
 	if(gray_state(0) && !gray_state(12))
