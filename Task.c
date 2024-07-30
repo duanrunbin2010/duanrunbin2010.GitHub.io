@@ -1,8 +1,8 @@
-#include "user.h"         /*¸ÃĞĞÊÇ±ØĞëµÄ*/
+#include "user.h"        
 /*****V3.0*****/
 #define symbol( x ) ( x < 0  ? -1 : ( x > 0 ? 1 : 0 ) )
 
-float dT = 1.0f;          /*»ı·ÖÖÜÆÚ¡¢¶¨Ê±ÈÎÎñÖÜÆÚ£¬ºÁÃë*/
+float dT = 1.0f;        
 
 uint16_t gray_th[13];
 
@@ -429,14 +429,14 @@ void start(void)
 	{
 		gray_th[i] = eepread(100+i);
 		sleep(10);
-	}                                  //º­µÀÎŞË¢µç»ú³õÊ¼»¯
+	}                                  //æ¶µé“æ— åˆ·ç”µæœºåˆå§‹åŒ–
 	motor1_start();
 	motor2_start();
 	motor3_start();
 	motor4_start();
   Encoder1_init();
 	Encoder2_init();
-	Callbacktime((uint32_t)dT);                   /*¿ªÆô¶¨Ê±Ïß³Ì*/ 
+	Callbacktime((uint32_t)dT);                   /*å¼€å¯å®šæ—¶çº¿ç¨‹*/ 
 	LCD_Clear(GREEN);
 
   while(1)
@@ -547,75 +547,6 @@ int8_t gray_state(uint8_t ch)
 		return 0;
 	}
 }
-//void states_out(void)
-//{
-//				if(gray_state(6))
-//				{	
-//					state = 0;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(5) && !gray_state(7))
-//				{	
-//					state = 1;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(5) && gray_state(7))
-//				{	
-//					state = -1;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(4) && !gray_state(8))
-//				{	
-//					state = 2;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(4) && gray_state(8))
-//				{	
-//					state = -2;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(3) && !gray_state(9))
-//				{	
-//					state = 3;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(3) && gray_state(9))
-//				{	
-//					state = -3;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(2) && !gray_state(10))
-//				{	
-//					state = 4;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(2) && gray_state(10))
-//				{	
-//					state = -4;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(1) && !gray_state(11))
-//				{	
-//					state = 6;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(1) && gray_state(11))
-//				{	
-//					state = -6;	
-//					out_time = seconds();
-//				}
-//				if(gray_state(0) && !gray_state(12))
-//				{	
-//					state = 10;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(0) && gray_state(12))
-//				{	
-//					state = -10;	
-//					out_time = seconds();
-//				}
-//}
-
 void states_out(void)
 {
 	if(gray_state(0) && !gray_state(12))
