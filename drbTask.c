@@ -1,12 +1,15 @@
-#include "user.h"         /*¸ÃÐÐÊÇ±ØÐëµÄ*/
-/*****V3.0*****/
+#include "user.h"         /*è¯¥è¡Œæ˜¯å¿…é¡»çš„*/
+
 #define symbol( x ) ( x < 0  ? -1 : ( x > 0 ? 1 : 0 ) )
 
-float dT = 1.0f;          /*»ý·ÖÖÜÆÚ¡¢¶¨Ê±ÈÎÎñÖÜÆÚ£¬ºÁÃë*/
+float dT = 1.0f;          /*ç§¯åˆ†å‘¨æœŸã€å®šæ—¶ä»»åŠ¡å‘¨æœŸï¼Œæ¯«ç§’*/
 
 uint16_t gray_th[13];
 
+
 int8_t state;
+int8_t op;
+int8_t yiting;
 uint32_t out_time;
 
 int16_t ls;
@@ -19,7 +22,7 @@ float eaz;
 float iaz;
 float daz;
 
-float lrz;
+float lrz; 
 float erz;
 float irz;
 float drz;
@@ -38,40 +41,164 @@ void program2(void);
 void program3(void);
 void start(void);
 void stop(void);
-
+void stoptime(int32_t time);
+void stoptouch(uint16_t ens);
+void sportdh(uint16_t sp,uint16_t Ens,int16_t  pei,uint16_t yit);
 void RateZ_test(void);
- 
 void Task(void)   
 {
-	start();	
+	start();
   if(key == 1)
 	{
 		program1();
 	}
 	else if(key == 2)
 	{
-		program2();
+		//sportdh(270,1780,-3,50);
+		//stoptime(3000);
+		sportdh(eepread(0),eepread(1),9,50);
 	}
 	else if(key == 4)
 	{
 		program3();
+		//sportdh(250,19000,3,50);
 	}
 	else 
 	{
+		//sportdh(250,19000,9);
 		gray_init();
 	}
 	stop();
 }
+void sportdh(uint16_t sp,uint16_t Ens,int16_t  pei,uint16_t yit)//spä¸ºé€Ÿåº¦,Ensä¸ºç¼–ç å€¼ï¼Œpeiä¸ºå…‰ç”µåç§»å€¼
+{
+	float pyt;
+	uint32_t intimes=seconds();
+	int8_t last;
+	int16_t H;
+	int16_t dg;
+	float p;
+	if(abs(pei)>4)
+	{
+		while(En() < Ens && seconds()-intimes<12000)
+		{
+			if(seconds() > out_time+500 && abs(state) > 5)
+			{
+				op=1;
+				break;
+			}
+			
+			sport(sp);
+		}
+	}
+	else if(pei!=0)
+	{
+		while(En() < Ens && seconds()-intimes<12000)
+		{
+			if(seconds() > out_time+300 && abs(state) > 5)
+			{
+				op=1;
+				break;
+			}
+			es = state+pei;
+			p= sp*(1.0f-0.13f*abs(es));
+			pyt = 0.13f*sp*es+0.35*is+14.0f*ds; 
+			mydriver(p,pyt);
+		}
+	}
+	else
+	{
+		while(En() < Ens && seconds()-intimes<12000)
+		{
+			if(seconds() > out_time+400 && abs(state) > 5)
+			{
+				op=1;
+				break;
+			}
+				if(last != state)
+				{
+					H = H_angle();
+					last = state;
+				}
+//			dg = (H+30*state+3600)%3600;  //30
+//			if(abs(state) > 5)
+//			{
+//				mydriver(sp/13.5, (int16_t)(0.05f*sp*state));  //10,15, 0.06
+//			}
+			es=state;
+			dg = (H+30*yiting+3600)%3600;
+			if(abs(state) > 5)
+			{
+				//mydriver(LIMIT(0.5f*abs(is),0,0.1f*sp),50.0f*state-0.3f*is);
+					mydriver(abs((int16_t )(is*0.35f)),yit*state-0.5f*is);
+				//line(sp, dg);
+			}
+			else
+			{
+				line(sp, dg);
+			}
+		}
+	}
+}
+//void sportdh(uint16_t sp,uint16_t Ens,uint16_t  pei)
+//{
+//	float pyt;
+//	int8_t last;
+//	int16_t H;
+//	int16_t dg;
+//	float p;
+//  while(En() < Ens)
+//	{
+//		if(seconds() > out_time+500 && abs(state) > 5)
+//		{
+//			op=1;
+//      		break;
+//		}
+//		if(pei>6)
+//		{
+//			sport(sp);
+//		}
+//		else if(pei!=0)
+//		{
+//			es = state+pei;
+//			p= sp*(1.0f-0.15f*abs(es));
+//			//pyt =0.129f*sp*state; 
+//			pyt = 0.13f*sp*es+0.29*is+10.0f*ds; 
+//			mydriver(p,pyt);
+//		}
+//		else
+//		{
+//			if(last != state)
+//			{
+//				H = H_angle();
+//				last = state;
+//			}
+//			
+//			dg = (H+30*yiting+3600)%3600;
+//			es=state;
+//			if(abs(state) > 5)
+//			{
+//					mydriver(abs((int16_t )(is*0.29f)),50*state-0.6f*is);
+//			}
+//			else
+//			{
+//				line(sp, dg);
+//			}
+//		}
+//	}
+//		
+//}
 
 void program1(void)   
 {
+	
 	uint16_t sum=0,anss=0,peiyt=0,ansx=0;
 	int16_t sp[20];
 	int16_t pyt[100];
 	for(uint16_t i=0;i<20;i++)
 	{
 		pyt[i]=0;
-		sp[i]=0;
+		sp[i]=250;
 	}
 	sleep(100);
 	uint32_t pt;
@@ -121,9 +248,7 @@ void program1(void)
 					}
 						LCD_XY(10,10);
 						printf("En:%4d",En());
-						
 					}
-					
 				}
 				if(GetKey())
 				{
@@ -295,102 +420,58 @@ void program1(void)
 	
 	//while(1);
 
-	
 }
 
 void program2(void)   
 {
-	
-	int8_t last;
-	int16_t H;
-	int16_t dg;
-	int16_t sp = 250;
-	int16_t Ens = 21000;
-  while(En() < Ens && seconds() < 16000)
+	int16_t sp = eepread(0);
+	int16_t Ens = eepread(1);
+  while(En() < 19989)
 	{
-		if(last != state)
-		{
-			H = H_angle();
-			last = state;
-		}
-		dg = (H+30*state+3600)%3600;  //30
-		if(abs(state) > 5)
-		{
-			mydriver(sp/13.5, (int16_t)(0.05f*sp*state));  //10,15, 0.06
-		}
-		else
-		{
-		  line(sp, dg);
-		}
-		if(seconds() > out_time+400 && abs(state) > 5)
+		sport(sp);
+		if(seconds() > out_time+300 && abs(state) > 5)
 		{
       break;
 		}
 	}
-		
 }
   
 void program3(void)   
 {
-	int16_t i;
-	int16_t sp[20];
-	int16_t Ens[20];
-	float buf = 200.0f;
-	int8_t last;
-	int16_t H;
-	int16_t dg;
-	float lv;
-	float rv;
-	for(i = 0; i < 20; i++)
+	int16_t sp[20];//={350, 270, 300, 300,300, 250,  380,  250,  300,  0};é€Ÿåº¦
+	int16_t Ens[20];//={998,5448,7288,9775,10717,12362,15918,16711,17981,0};ç¼–ç 
+	int16_t pei1[20][2]={};//å·¡çº¿æ¨¡å¼(é»˜è®¤ä¸º0)
+	int16_t yit1[20][2]={};//è½¬å¼¯å…‰ç”µå€çŽ‡(é»˜è®¤ä¸º50)
+	int16_t pei[20];//å·¡çº¿æ¨¡å¼
+	int16_t yit[20];//è½¬å¼¯å…‰ç”µå€çŽ‡
+	for(uint16_t i = 0; i < 20; i++)
 	{
-		sp[i] = eepread(2*i);
-		Ens[i] = eepread(2*i+1);
+				pei[i]=0;
+				yit[i]=50;
+				sp[i]=eepread(2*i);
+				Ens[i]=eepread(2*i+1);
 	}
-	for(i = 0; i < 20; i++)
+	for(uint16_t i=0;i<20;i++)
 	{
-		if(Ens[i] == 0 || sp[i] == 0)
+		if(pei1[i][0]>0)
+		{
+			pei[pei1[i][0]-1]=pei1[i][1];
+		}
+		if(yit1[i][0]>0)
+		{
+			yit[yit1[i][0]-1]=yit1[i][1];
+		}
+	}
+	
+	for(uint16_t i = 0; i < 20; i++)
+	{
+		if(Ens[i] == 0 || sp[i] == 0 || op==1)
 		{
 			break;
 		}
-		while(En() < Ens[i])
-	  {
-			if(buf > (float)sp[i])
-			{
-				buf = (float)sp[i];
-			}
-			else if(buf < (float)sp[i])
-			{
-				buf = buf+0.01f;   //0.01
-			}
-      if(last != state)
-		  {
-			  H = H_angle();
-			  last = state;
-		  }
-			
-		  dg = (H+37*state+3600)%3600;  //30
-			es=state;
-		  if(abs(state) > 5)
-		  {
-				lv = 0.5f*abs(is);
-				rv = 50.0f * state-0.2f*is;
-				lv = LIMIT(lv , 0 , 0.1f * buf); 
-			  mydriver((int16_t)(0.1f*buf), (int16_t)(0.1f*buf*state));  //10,15, 0.06
-				
-				//mydriver(abs((int16_t )(is*0.1f)),35*state-0.56f*is);
-
-		  }
-		  else
-		  {
-		    line((int16_t)buf, dg);
-		  }
-			if(seconds() > out_time+400 && abs(state) > 6)
-			{
-				sp[i + 1] = 0;
-				Ens[i + 1] = 0;
-				break;
-			}
-	  }
+		sportdh(sp[i],Ens[i],pei[i],yit[i]);
+		//stoptime(5000);
+		//stoptouch(Ens[i]);
 	}
 }
 
@@ -407,10 +488,10 @@ void RateZ_test(void)
 	  printf("%4d",H_angle());
 		if(touch())
 		{
-		  motor1(-200);
-	    motor2(-200);
-	    motor3(-200);
-	    motor4(-200);
+		  motor1(-300);
+	    motor2(-300);
+	    motor3(-300);
+	    motor4(-300);
 		  sleep(2000);
 		  LCD_XY(10,70);
 	    printf("%f",imudata[6]-imudata[13]);
@@ -429,14 +510,19 @@ void start(void)
 	{
 		gray_th[i] = eepread(100+i);
 		sleep(10);
-	}                                  //º­µÀÎÞË¢µç»ú³õÊ¼»¯
-	motor1_start();
+	}    
+	if(eepread(0)<100)
+	{
+		eepwrite(0,eepread(99));
+	}
+	USART1_baud(38400);		
+	motor1_start();//æ¶µé“æ— åˆ·ç”µæœºåˆå§‹åŒ–
 	motor2_start();
 	motor3_start();
 	motor4_start();
   Encoder1_init();
 	Encoder2_init();
-	Callbacktime((uint32_t)dT);                   /*¿ªÆô¶¨Ê±Ïß³Ì*/ 
+	Callbacktime((uint32_t)dT);                   /*å¼€å¯å®šæ—¶çº¿ç¨‹*/ 
 	LCD_Clear(GREEN);
 
   while(1)
@@ -463,6 +549,7 @@ void stop(void)
 	motor2(0);
 	motor3(0);
 	motor4(0);
+	eepwrite(99,eepread(0));
 	LCD_Clear(BACK_COLOR);
 	sleep(1000);
 	LCD_XY(10,10);
@@ -470,7 +557,34 @@ void stop(void)
 	LCD_XY(10,30);
 	printf("En = %d",En());
 }
-
+void stoptouch(uint16_t ens)
+{
+	LCD_XY(10,40);
+	printf("En = %4d",ens);
+	while(1)
+	{
+		LCD_XY(10,60);
+		printf("NewEn = %4d",En());
+		if(touch())break;
+		motor1(0);
+		motor2(0);
+		motor3(0);
+		motor4(0);
+	}
+}
+void stoptime(int32_t time)
+{
+	uint32_t intime=seconds();
+	LCD_XY(10,60);
+	printf("En = %4d",En());
+	while(seconds ()-intime< time)
+	{
+		motor1(0);
+		motor2(0);
+		motor3(0);
+		motor4(0);
+	}
+}
 void setEn(uint8_t ch, uint32_t count)  
 {
 	if(ch == 1)
@@ -547,139 +661,84 @@ int8_t gray_state(uint8_t ch)
 		return 0;
 	}
 }
-//void states_out(void)
-//{
-//				if(gray_state(6))
-//				{	
-//					state = 0;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(5) && !gray_state(7))
-//				{	
-//					state = 1;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(5) && gray_state(7))
-//				{	
-//					state = -1;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(4) && !gray_state(8))
-//				{	
-//					state = 2;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(4) && gray_state(8))
-//				{	
-//					state = -2;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(3) && !gray_state(9))
-//				{	
-//					state = 3;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(3) && gray_state(9))
-//				{	
-//					state = -3;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(2) && !gray_state(10))
-//				{	
-//					state = 4;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(2) && gray_state(10))
-//				{	
-//					state = -4;	
-//					out_time = seconds();
-//				}
-//				else if(gray_state(1) && !gray_state(11))
-//				{	
-//					state = 6;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(1) && gray_state(11))
-//				{	
-//					state = -6;	
-//					out_time = seconds();
-//				}
-//				if(gray_state(0) && !gray_state(12))
-//				{	
-//					state = 10;	
-//					out_time = seconds();
-//				}
-//				else if(!gray_state(0) && gray_state(12))
-//				{	
-//					state = -10;	
-//					out_time = seconds();
-//				}
-//}
 
 void states_out(void)
 {
 	if(gray_state(0) && !gray_state(12))
 	{	
-		state = 10;	
+		yiting=10;
+		state = 6;	
 		out_time = seconds();
 	}
 	else if(!gray_state(0) && gray_state(12))
 	{	
-		state = -10;	
+		yiting=-10;
+		state = -6;	
 		out_time = seconds();
 	}
 	else if(gray_state(1) && !gray_state(11))
 	{	
-		state = 6;	
+		yiting=9;
+		state = 5;	
 		out_time = seconds();
 	}
 	else if(!gray_state(1) && gray_state(11))
 	{	
-		state = -6;	
+		yiting=-9;
+		state = -5;	
 		out_time = seconds();
 	}
 	else if(gray_state(2) && !gray_state(10))
 	{	
+		yiting=7;
 		state = 4;	
 		out_time = seconds();
 	}
 	else if(!gray_state(2) && gray_state(10))
 	{	
+		yiting=-7;
 		state = -4;	
 		out_time = seconds();
 	}
 	else if(gray_state(3) && !gray_state(9))
 	{	
+		yiting=5;
 		state = 3;	
 		out_time = seconds();
 	}
 	else if(!gray_state(3) && gray_state(9))
 	{	
+		yiting=-5;
 		state = -3;	
 		out_time = seconds();
 	}
 	else if(gray_state(4) && !gray_state(8))
 	{	
+		yiting=2;
 		state = 2;	
 		out_time = seconds();
 	}
 	else if(!gray_state(4) && gray_state(8))
 	{	
+		yiting=-2;
 		state = -2;	
 		out_time = seconds();
 	}
 	else if(gray_state(5) && !gray_state(7))
 	{	
+		yiting=1;
 		state = 1;	
 		out_time = seconds();
 	}
 	else if(!gray_state(5) && gray_state(7))
 	{	
+		yiting=-1;
 		state = -1;	
 		out_time = seconds();
 	}
 	else if(gray_state(6))
 	{	
+		yiting=0;
 		state = 0;	
 		out_time = seconds();
 	}
@@ -690,8 +749,7 @@ void mydriver(int16_t lv, int16_t rv)
 	int16_t spl;
 	int16_t spr; 
 	erz = rv-0.43f*(imudata[6]-imudata[13]);          
-	rv = rv+(int16_t)(2.0f*erz+0.01f*irz+10.0f*drz);     //
-	//rv = rv+(int16_t)(1.5f*erz+0.0f*irz+0.0f*drz); 
+	rv = rv+(int16_t)(1.5f*erz+0.01f*irz+10.0f*drz);  
 	spl = rv-lv;
 	spr = rv+lv;
 	motor1(-spl);
@@ -708,8 +766,7 @@ void line(int16_t speed, int16_t angle)
 	eaz = rv;
 	rv = LIMIT(rv, -900, 900);
 	lv = (speed*(900-abs(rv)))/900; 
-	rv = (int16_t)(0.8f*eaz+0.001f*iaz+10.0f*daz);  //
-	//rv = (int16_t)(0.8f*eaz+0.0f*iaz+0.0f*daz); 
+	rv = (int16_t)(0.8f*eaz+0.001f*iaz+10.0f*daz);
 	mydriver(lv, rv);
 }
 
